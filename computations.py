@@ -28,5 +28,6 @@ def experiment_formula():
         errors=errors+1
     print(r1)
     print(r2)
+    return errors
     
 

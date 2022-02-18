@@ -15,8 +15,17 @@ def experiment_formula():
     x5 = pow(932.92928, 47)
     x6=pow(47487577,464)
     #print(x5)
-    r1=double(x1)-double(x2)/double(x4)+double(x6)
+    result1=-1.3065339497381586e+199
+    result2=2.717995320972408e+229
+    r1=double(x1)-double(x2)/double(x4)
+    errors=0
+    if r1!=result1:
+        print("error")
+        errors=errors+1
     r2=double(x1)-double(x5)+double(x3)
+    if r2!=result2 :
+        print("error")
+        errors=errors+1
     print(r1)
     print(r2)
     

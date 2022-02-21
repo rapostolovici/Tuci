@@ -28,6 +28,16 @@ def experiment_formula():
         errors=errors+1
     print(r1)
     print(r2)
+    r3=double(x4)-double(x3)/double(x1)
+    print(r3)
+    result3=-7.646500423678361e+117
+    if r3!=result3 :
+        print("error")
+        errors=errors+1
+    r4=double(x2)-double(x3)+double(x5)
+    print(r4)
+    result4=1.0533622998366155e+250
+    if r4!=result4 :
+        print("error")
+        errors=errors+1
     return errors
-    
-

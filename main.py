@@ -1,21 +1,13 @@
 from computations import sum
-from computations import experiment_formula
-from sense_hat import SenseHat
-from sense_emu import SenseHat
+from computations import experiment_formula,print_message
+from logzero import logger, logfile
 from time import sleep
 import time
 from pathlib import Path
+from sense_hat import SenseHat
 
-
-def print_message(f,message,color):
-    f.write(message  + "\n")
-    sense.clear()
-    for char in message:
-      sense.show_letter(char, color)
-      sleep(1)
-      
 base_folder = Path(__file__).parent.resolve()      
-f = open(base_folder + "/experiment_result.txt", "w")    
+f = open(f"{base_folder}/experiment_result.txt", "w")    
 sense = SenseHat()
 red = (255, 0, 0)
 blue = (0, 0, 255)
@@ -23,29 +15,34 @@ green = (0, 255, 0)
 white = (255, 255, 255)
 yellow = (255, 255, 0)
 
-print_message("Starting experiment",blue)
+logfile(base_folder/"events.log")
+
+print_message(f,sense,"Starting experiment",blue)
 start_time = time.time()
-seconds = 4
+seconds = 15
 f.write("Starting time: " + str(time.ctime(start_time)) + "\n")
-humidity=0
 while True:
-    errors=experiment_formula()
-    current_time = time.time()
-    elapsed_time = current_time - start_time
-    if elapsed_time >= seconds:
-        break
-    if humidity != 0;
-        humidity = round(sense.humidity,4)
-        print_message("Humidity"+str(humidity))
+    try: 
+        errors=experiment_formula(f, sense)
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+        """ Read humidity from 5 to 5 seconds """
+        if elapsed_time % 5:
+            """ Reading humidity """
+            humidity = round(sense.humidity,2)
+            print_message(f,sense,"Humidity "+str(humidity), yellow)
     
+        
+        if elapsed_time >= seconds:
+            break
+    except Exception as e:
+        logger.error(f'{e.__class__.__name__}: {e}')
+""" Display errors (if any)"""        
 if errors > 0:
-    print_message("Found"+str(errors) +" errors",red)
-    f.write("Found"+str(errors) +" errors")
-    print("Found errors")
+    print_message(f,sense,"Found "+str(errors) +" error(s)",red)
 else:
-    print_message("No errors",green)
-    f.write("No errors")
-    print("No errors")
+    print_message(f,sense, "No errors",green)
 f.write("Ending time: " + str(time.ctime(start_time)) + "\n")
-f.close()
-print_message("Experiment completed",green)
+print_message(f,sense,"Experiment completed",green)
+sense.clear()       
+f.close()   

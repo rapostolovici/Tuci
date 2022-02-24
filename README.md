@@ -1,4 +1,4 @@
-This a project for the Life in Space Astro Pi Mission Space Lab challenge.
+This is a project for the Life in Space Astro Pi Mission Space Lab challenge.
 
 The purpose of the project is to see if the Raspberry PI device is working as expected in space and it is not affected by other things like radiation.
 

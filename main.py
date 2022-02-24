@@ -9,6 +9,7 @@ import csv
 def print_message(f, sense, message, color):
     """A function to print a message on the HAT and in the experiment result file"""
     f.write(message  + "\n")
+    logger.info(message)
     for char in message:
       sense.show_letter(char, color)
       sleep(1)
@@ -27,26 +28,34 @@ def experiment_formula(f,sense):
     errors=0
     if r1!=result1:
         print_message(f,sense,"Error result 1", red)
-        print("error")
+        logger.info("error result 1")
+        logger.info("error")
         errors=errors+1
     r2=x1-x5+x3
     if r2!=result2 :
         print_message(f,sense,"Error result 2", red)
+        logger.info("error result 2")
+        logger.info("error")
         errors=errors+1
     r3=x4-x3/x1
     result3=-7.646500423678361e+117
     if r3!=result3 :
         print_message(f,sense,"Error result 3", red)
+        logger.info("error result 3")
+        logger.info("error")
         errors=errors+1
     r4=x2-x3+x5
     result4=1.0533622998366155e+250
     if r4!=result4 :
         print_message(f,sense,"Error result 4", red)
+        logger.info("error result 4")
+        logger.info("error")
         errors=errors+1
     return errors
 
 def create_csv(data_file):
     """A function to create a csv file"""
+    logger.info("creating csv file")
     with open(data_file, 'w') as f:
         writer = csv.writer(f)
         header = ("Date/time", "Humidity value", "Number of errors")
@@ -54,6 +63,7 @@ def create_csv(data_file):
         
 def add_csv_data(data_file, data):
     """A function to add data into the csv file"""
+    logger.info("adding data to csv file")
     with open(data_file, 'a') as f:
         writer = csv.writer(f)
         writer.writerow(data)
@@ -72,6 +82,7 @@ white = (255, 255, 255)
 yellow = (255, 255, 0)
 
 print_message(f,sense,"Starting experiment",blue)
+logger.info("Starting experiment")
 
 """Create a `datetime` variable to store the start time"""
 start_time = datetime.now()
@@ -90,6 +101,7 @@ while (now_time < start_time + timedelta(minutes=running_time)):
         """ Reading humidity """
         humidity = round(sense.humidity,2)
         print_message(f,sense,"Humidity "+str(humidity), yellow)
+        logger.info("Humidity "+str(humidity))
         row = (datetime.now(),humidity, errors)
         add_csv_data(data_file, row)
         """Update the current time"""
@@ -101,8 +113,10 @@ if errors > 0:
     print_message(f,sense,"Found "+str(errors) +" error(s)",red)
 else:
     print_message(f,sense, "No errors",green)
-logger.info("Ending time: " + str(start_time) + "\n")
+logger.info("Ending time: " + str(now_time) + "\n")
 print_message(f,sense,"Experiment completed",green)
+logger.info("Experiment completed")
 """Close sense hat and the file"""
 sense.clear()       
 f.close()
+logger.info("Sense hat and file closed")

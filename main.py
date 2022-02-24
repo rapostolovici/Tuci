@@ -1,10 +1,10 @@
-from computations import sum
-from computations import experiment_formula,print_message
 from logzero import logger, logfile
 from time import sleep
 import time
 from pathlib import Path
 from sense_hat import SenseHat
+from datetime import datetime, timedelta
+import csv
 
 def print_message(f, sense, message, color):
     """A function to print a message on the HAT and in the experiment result file"""
@@ -21,34 +21,49 @@ def experiment_formula(f,sense):
     x3 = pow(293.1129, 93)
     x4 = pow(8239.1292, 13)
     x5 = pow(932.92928, 47)
-    #x6=pow(47487577,464)
     result1=-1.3065339497381586e+199
     result2=2.717995320972408e+229
-    r1=double(x1)-double(x2)/double(x4)
+    r1=x1-x2/x4
     errors=0
     if r1!=result1:
         print_message(f,sense,"Error result 1", red)
         print("error")
         errors=errors+1
-    r2=double(x1)-double(x5)+double(x3)
+    r2=x1-x5+x3
     if r2!=result2 :
         print_message(f,sense,"Error result 2", red)
         errors=errors+1
-    r3=double(x4)-double(x3)/double(x1)
+    r3=x4-x3/x1
     result3=-7.646500423678361e+117
-    #result3=-7.6
     if r3!=result3 :
         print_message(f,sense,"Error result 3", red)
         errors=errors+1
-    r4=double(x2)-double(x3)+double(x5)
+    r4=x2-x3+x5
     result4=1.0533622998366155e+250
     if r4!=result4 :
         print_message(f,sense,"Error result 4", red)
         errors=errors+1
     return errors
 
+def create_csv(data_file):
+    """A function to create a csv file"""
+    with open(data_file, 'w') as f:
+        writer = csv.writer(f)
+        header = ("Date/time", "Humidity value", "Number of errors")
+        writer.writerow(header)
+        
+def add_csv_data(data_file, data):
+    """A function to add data into the csv file"""
+    with open(data_file, 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+        
 base_folder = Path(__file__).parent.resolve()      
-f = open(f"{base_folder}/experiment_result.txt", "w")    
+f = open(f"{base_folder}/experiment_result.txt", "w")
+data_file = base_folder/'data.csv'
+create_csv(data_file)
+logfile(base_folder/"events.log")
+
 sense = SenseHat()
 red = (255, 0, 0)
 blue = (0, 0, 255)
@@ -56,34 +71,38 @@ green = (0, 255, 0)
 white = (255, 255, 255)
 yellow = (255, 255, 0)
 
-logfile(base_folder/"events.log")
-
 print_message(f,sense,"Starting experiment",blue)
-start_time = time.time()
-seconds = 15
-f.write("Starting time: " + str(time.ctime(start_time)) + "\n")
-while True:
+
+"""Create a `datetime` variable to store the start time"""
+start_time = datetime.now()
+"""Create a `datetime` variable to store the current time"""
+"""(these will be almost the same at the start)"""
+now_time = datetime.now()
+"""Run a loop for 170 minutes (10 minutes earlier to be sure we are on time)"""
+running_time = 170
+
+logger.info("Starting time: " + str(now_time) + "\n")
+
+while (now_time < start_time + timedelta(minutes=running_time)):
     try: 
         errors=experiment_formula(f, sense)
         current_time = time.time()
-        elapsed_time = current_time - start_time
-        """ Read humidity from 5 to 5 seconds """
-        if elapsed_time % 5:
-            """ Reading humidity """
-            humidity = round(sense.humidity,2)
-            print_message(f,sense,"Humidity "+str(humidity), yellow)
-    
-        
-        if elapsed_time >= seconds:
-            break
+        """ Reading humidity """
+        humidity = round(sense.humidity,2)
+        print_message(f,sense,"Humidity "+str(humidity), yellow)
+        row = (datetime.now(),humidity, errors)
+        add_csv_data(data_file, row)
+        """Update the current time"""
+        now_time = datetime.now() 
     except Exception as e:
         logger.error(f'{e.__class__.__name__}: {e}')
-""" Display errors (if any)"""        
+"""Display errors (if any)"""        
 if errors > 0:
     print_message(f,sense,"Found "+str(errors) +" error(s)",red)
 else:
     print_message(f,sense, "No errors",green)
-f.write("Ending time: " + str(time.ctime(start_time)) + "\n")
+logger.info("Ending time: " + str(start_time) + "\n")
 print_message(f,sense,"Experiment completed",green)
+"""Close sense hat and the file"""
 sense.clear()       
-f.close()   
+f.close()
